@@ -60,7 +60,7 @@ func (q LoggerErrorQueue) Error() string {
 	return output
 }
 
-func (q *LoggerErrorQueue) DumpErrors() {
+func (q *LoggerErrorQueue) DumpErrors() { //maybe make this return data
 	for _, loggerError := range q.Queue {
 		fmt.Println("\033[0;31m"+loggerError.Timestamp+" "+loggerError.Stamp+
 			" ERR\033[0m "+loggerError.Content)

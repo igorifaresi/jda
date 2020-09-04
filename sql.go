@@ -7,30 +7,64 @@ import (
 
 func SelectOneFromSqlTable(
 	database *sql.DB,
+	id *int,
+	outputInterface interface{},
 	tableName string,
-	outputInterface *interface{},
 	queryExpression string,
 	args ...interface{},
-) error {
+) (bool, error) {
 	l := GetLogger()
 
 	if tableName == "" {
 		l.Error("Table name is null")
-		return l.ErrorQueue
+		return false, l.ErrorQueue
 	}
 
 	expression := "SELECT * FROM "+tableName
-
 	if queryExpression != "" {
 		expression = expression+" WHERE "+queryExpression
 	}
 
-	//...
+	rows, err := database.Query(expression, args...)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error("Error in query entity from SQL database")
+		return false, l.ErrorQueue
+	}
 
-	return nil
+	structValue := reflect.Indirect(reflect.ValueOf(outputInterface))
+
+	length := structValue.NumField()
+	if length == 0 {
+		l.Error("Empty interface")
+		return false, l.ErrorQueue
+	}
+
+	fieldsToInsert := make([]interface{}, 1)
+	fieldsToInsert[0] = id
+
+	for i := 0; i < length; i = i + 1 {
+		fieldsToInsert = append(
+			fieldsToInsert,
+			structValue.Field(i).Addr().Interface(),
+		)
+	}
+
+	*id = 0
+	if rows.Next() {
+		err = rows.Scan(fieldsToInsert...)
+		if err != nil {
+			l.Error(err.Error())
+			l.Error("Error in scan fields to SQL select query row")
+			return true, l.ErrorQueue
+		}
+		return true, nil
+	}
+
+	return false, nil
 }
 
-func InsertIntoSqlTable(database *sql.DB, tableName string, s interface{}) error {
+func InsertIntoSqlTable(database *sql.DB, s interface{}, tableName string) error {
 	l := GetLogger()
 
 	if tableName == "" {
@@ -38,9 +72,9 @@ func InsertIntoSqlTable(database *sql.DB, tableName string, s interface{}) error
 		return l.ErrorQueue
 	}
 
-	v := reflect.ValueOf(s)
+	structValue := reflect.ValueOf(s)
 
-	length := v.NumField()
+	length := structValue.NumField()
 	if length == 0 {
 		l.Error("Empty interface")
 		return l.ErrorQueue
@@ -51,8 +85,8 @@ func InsertIntoSqlTable(database *sql.DB, tableName string, s interface{}) error
 	expression := "INSERT INTO "+tableName+" ("
 
 	for i := 0; i < length; i = i + 1 {
-		fieldsToInsert = append(fieldsToInsert, v.Field(i).Interface())
-		fieldName := v.Type().Field(i).Name
+		fieldsToInsert = append(fieldsToInsert, structValue.Field(i).Interface())
+		fieldName := structValue.Type().Field(i).Name
 
 		expression = expression+fieldName
 		if i != (length - 1) {
@@ -86,7 +120,7 @@ func InsertIntoSqlTable(database *sql.DB, tableName string, s interface{}) error
 	return nil
 }
 
-func CreateSqlTable(database *sql.DB, tableName string, s interface{}) error {
+func CreateSqlTable(database *sql.DB, s interface{}, tableName string) error {
 	l := GetLogger()
 
 	if tableName == "" {
@@ -94,21 +128,21 @@ func CreateSqlTable(database *sql.DB, tableName string, s interface{}) error {
 		return l.ErrorQueue
 	}
 
-	v := reflect.ValueOf(s)
+	structValue := reflect.ValueOf(s)
 
-	length := v.NumField()
+	length := structValue.NumField()
 	if length == 0 {
 		l.Error("Empty interface")
 		return l.ErrorQueue
 	}
 
-	expression := "CREATE TABLE IF NOT EXISTS "+tableName+" ("
+	expression := "CREATE TABLE IF NOT EXISTS "+tableName+" (id INTEGER PRIMARY KEY AUTO_INCREMENT, "
 
 	for i := 0; i < length; i = i + 1 {
-		fieldName := v.Type().Field(i).Name
+		fieldName := structValue.Type().Field(i).Name
 
 		//get SQL tags for each field
-		tags := v.Type().Field(i).Tag.Get("sql")
+		tags := structValue.Type().Field(i).Tag.Get("sql")
 		if tags == "" || tags == "-" {
 			continue
 		}

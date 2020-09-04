@@ -3,19 +3,24 @@ package jda
 import (
 	"net/http"
 	"io/ioutil"
+	"os"
 )
 
 type HttpRequestContext struct {
-	w http.ResponseWriter
-	r *http.Request
+	W http.ResponseWriter
+	R *http.Request
 }
 
-type HttpHandleGETFunc func(HttpRequestContext, *LoggerErrorQueue) (int, string)
-type HttpHandlePOSTFunc func(HttpRequestContext, []byte, *LoggerErrorQueue) (int, string)
+type HttpHandleGETFunc func(HttpRequestContext, error) (int, string)
+type HttpHandlePOSTFunc func(HttpRequestContext, []byte, error) (int, string)
 
 type HttpMiddlewareFunc func(http.HandlerFunc) http.HandlerFunc
 
 var DefaultHttpMiddlewareFunc HttpMiddlewareFunc = nil
+
+func HttpListenEnvPort() {
+	http.ListenAndServe(":"+os.Getenv("PORT"), nil) //Look this better, can have error check
+}
 
 func HttpHandleGET(path string, handled HttpHandleGETFunc) {
 	f := func(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +67,7 @@ func HttpHandlePOST(path string, handled HttpHandlePOSTFunc) {
 			body, err := ioutil.ReadAll(r.Body)
 			if err != nil {
 				l.Error("Error in parsing body")
-				statusCode, output = handled(ctx, nil, &l.ErrorQueue)
+				statusCode, output = handled(ctx, nil, l.ErrorQueue)
 			} else {
 				statusCode, output = handled(ctx, body, nil)
 			}
