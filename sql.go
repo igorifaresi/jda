@@ -64,6 +64,66 @@ func SelectOneFromSqlTable(
 	return false, nil
 }
 
+func SelectFromSqlTable(
+	database *sql.DB,
+	templateInterface interface{},
+	tableName string,
+	queryExpression string,
+	args ...interface{},
+) ([]int, []interface{}, error) {
+	l := GetLogger()
+
+	if tableName == "" {
+		l.Error("Table name is null")
+		return false, l.ErrorQueue
+	}
+
+	expression := "SELECT * FROM "+tableName
+	if queryExpression != "" {
+		expression = expression+" WHERE "+queryExpression
+	}
+
+	rows, err := database.Query(expression, args...)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error("Error in query entity from SQL database")
+		return false, l.ErrorQueue
+	}
+
+	structValue := reflect.Indirect(reflect.ValueOf(templateInterface))
+
+	length := structValue.NumField()
+	if length == 0 {
+		l.Error("Empty interface")
+		return false, l.ErrorQueue
+	}
+
+	templateFields := make([]interface{}, 1)
+	templateFields[0] = id
+
+	for i := 0; i < length; i = i + 1 {
+		templateFields = append(
+			templateFields,
+			structValue.Field(i).Addr().Interface(),
+		)
+	}
+	
+	outputFields 
+
+	*id = 0
+	if rows.Next() {
+		err = rows.Scan(fieldsToInsert...)
+		if err != nil {
+			l.Error(err.Error())
+			l.Error("Error in scan fields to SQL select query row")
+			return true, l.ErrorQueue
+		}
+		return true, nil
+	}
+	
+	return 
+}
+
 func InsertIntoSqlTable(database *sql.DB, s interface{}, tableName string) error {
 	l := GetLogger()
 
