@@ -39,20 +39,19 @@ func SelectOneFromSqlTable(
 		l.Error("Empty interface")
 		return false, l.ErrorQueue
 	}
-
-	fieldsToInsert := make([]interface{}, 1)
-	fieldsToInsert[0] = id
-
+	
+	var outputFields []interface{} = nil
 	for i := 0; i < length; i = i + 1 {
-		fieldsToInsert = append(
-			fieldsToInsert,
+		outputFields = append(
+			outputFields,
 			structValue.Field(i).Addr().Interface(),
 		)
 	}
 
 	*id = 0
+	var idInter interface{} = id
 	if rows.Next() {
-		err = rows.Scan(fieldsToInsert...)
+		err = rows.Scan(append(idInter, outputFields)...)
 		if err != nil {
 			l.Error(err.Error())
 			l.Error("Error in scan fields to SQL select query row")
@@ -70,7 +69,7 @@ func SelectFromSqlTable(
 	tableName string,
 	queryExpression string,
 	args ...interface{},
-) ([]int, []interface{}, error) {
+) ([]int, [][]interface{}, error) {
 	l := GetLogger()
 
 	if tableName == "" {
@@ -87,7 +86,7 @@ func SelectFromSqlTable(
 	if err != nil {
 		l.Error(err.Error())
 		l.Error("Error in query entity from SQL database")
-		return false, l.ErrorQueue
+		return nil, nil, l.ErrorQueue
 	}
 
 	structValue := reflect.Indirect(reflect.ValueOf(templateInterface))
@@ -95,12 +94,10 @@ func SelectFromSqlTable(
 	length := structValue.NumField()
 	if length == 0 {
 		l.Error("Empty interface")
-		return false, l.ErrorQueue
+		return nil, nil, l.ErrorQueue
 	}
 
-	templateFields := make([]interface{}, 1)
-	templateFields[0] = id
-
+	var templateFields []interface{} = nil
 	for i := 0; i < length; i = i + 1 {
 		templateFields = append(
 			templateFields,
@@ -108,20 +105,26 @@ func SelectFromSqlTable(
 		)
 	}
 	
-	outputFields 
+	var outputFieldsArray [][]interface{} = nil
+	var outputIds []int 
+	for rows.Next() {
+		buffer := make([]interface{}, len(templateFields))
+		copy(buffer, templateFields)
 
-	*id = 0
-	if rows.Next() {
-		err = rows.Scan(fieldsToInsert...)
+		var id int = 0
+		var idTemplate interface{} = &id
+		err = rows.Scan(append(idTemplate, buffer)...)
 		if err != nil {
 			l.Error(err.Error())
 			l.Error("Error in scan fields to SQL select query row")
-			return true, l.ErrorQueue
+			return nil, nil, l.ErrorQueue
 		}
-		return true, nil
+		
+		outputIds = append(outputIds, id)
+		outputFieldsArray = append(outputFieldsArray, buffer)
 	}
 	
-	return 
+	return outputIds, outputFieldsArray, nil
 }
 
 func InsertIntoSqlTable(database *sql.DB, s interface{}, tableName string) error {
