@@ -4,9 +4,12 @@ import (
 	"reflect"
 	"strings"
 	"regexp"
+	"strconv"
 )
 
 var NameRegex = regexp.MustCompile(`^([A-Z]|[a-z])([A-Z]|[a-z]|[-]|[_]|[0-9])*$`)
+var CpfRegex = regexp.MustCompile(`^([0-9]{11})$`)
+var PhoneRegex = regexp.MustCompile(`^([0-9]{8,15})$`)
 var FileNameRegex = regexp.MustCompile(`^([A-Z]|[a-z]|[{]|[.])([A-Z]|[a-z]|[-]|[_]|[:]|[ ]|[0-9]|[.]|[{]|[}])*$`)
 var EmailRegex = regexp.MustCompile(`\A[\w+\-.]+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z`)
 var SocketRegex = regexp.MustCompile(`^(`+
@@ -24,6 +27,8 @@ var IPRegex = regexp.MustCompile(`^(`+
 `[0-9]|[1-9][0-9]|1[0-9][0-9]|2[0-4][0-9]|25[0-5])$`)
 var FileModeRegex = regexp.MustCompile(`^([0])([0-7])([0-7])([0-7])$`)
 var DirectoryRegex = regexp.MustCompile(`(([\w])*([\\]))*$`)
+
+var SizeLETagRegex = regexp.MustCompile(`^(size<=)([0-9])+$`)
 var MustIfTagRegex = regexp.MustCompile(`^(must-if\()(\w)+(\))([=])(\w|[|])*$`)
 var NotMustIfTagRegex = regexp.MustCompile(`^(!must-if\()(\w)+(\))([=])(\w|[|])*$`)
 
@@ -82,6 +87,50 @@ func validateName(ctx ValidateFieldContext, errorString string) (bool, error) {
 	case string:
 		if ctx.Inter.(string) != "" && !NameRegex.MatchString(ctx.Inter.(string)) {
 			l.Error("Field \""+ctx.Field.Name+"\" is not a name ("+errorString+")")
+			return false, l.ErrorQueue
+		}
+	default:
+		l.Error("Invalid type for \""+ctx.Field.Name+"\" field, expected string ("+
+			errorString+")")
+		return false, l.ErrorQueue
+	}
+
+	return true, nil
+}
+
+// syntax:
+//   phone
+//
+// Check if the field is a valid phone number, without symbols, only phone numbers.
+func validatePhone(ctx ValidateFieldContext, errorString string) (bool, error) { //TODO, check CPF sum
+	l := GetLogger()
+
+	switch ctx.Inter.(type) {
+	case string:
+		if ctx.Inter.(string) != "" && !PhoneRegex.MatchString(ctx.Inter.(string)) {
+			l.Error("Field \""+ctx.Field.Name+"\" is not a phone ("+errorString+")")
+			return false, l.ErrorQueue
+		}
+	default:
+		l.Error("Invalid type for \""+ctx.Field.Name+"\" field, expected string ("+
+			errorString+")")
+		return false, l.ErrorQueue
+	}
+
+	return true, nil
+}
+
+// syntax:
+//   cpf
+//
+// Check if the field is a valid CFP, without symbols, only CPF numbers.
+func validateCpf(ctx ValidateFieldContext, errorString string) (bool, error) { //TODO, check CPF sum
+	l := GetLogger()
+
+	switch ctx.Inter.(type) {
+	case string:
+		if ctx.Inter.(string) != "" && !CpfRegex.MatchString(ctx.Inter.(string)) {
+			l.Error("Field \""+ctx.Field.Name+"\" is not a CPF ("+errorString+")")
 			return false, l.ErrorQueue
 		}
 	default:
@@ -238,6 +287,42 @@ func validateFileName(ctx ValidateFieldContext, errorString string) (bool, error
 		if ctx.Inter.(string) != "" && !FileNameRegex.MatchString(ctx.Inter.(string)) {
 			l.Error("Field \""+ctx.Field.Name+"\" is not a valid file name ("+
 				errorString+")")
+			return false, l.ErrorQueue
+		}
+	default:
+		l.Error("Invalid type for \""+ctx.Field.Name+"\" field, expected string ("+
+			errorString+")")
+		return false, l.ErrorQueue
+	}
+
+	return true, nil
+}
+
+// syntax:
+//   size<=number
+//
+// Check if the field is a string, and if the size if lower or equals, than number
+// after "<=" symbol. The number have to be higher or equals than 1. Between
+// keyword "size" and symbol "<=" or between symbol "<=" and the number whitespaces
+// are not allowed.
+//
+// examples:
+//   size<=1
+//   size<=2
+//   size<=300
+//   size<=10000
+func validateSizeLE(ctx ValidateFieldContext, tag, errorString string) (bool, error) {
+	l := GetLogger()
+
+	//get the number
+	numberString := strings.Split(tag, "<=")[1]
+	number, _ := strconv.ParseInt(numberString, 10, 64)
+
+	switch ctx.Inter.(type) {
+	case string:
+		if ctx.Inter.(string) != "" && !(int64(len(ctx.Inter.(string))) <= number) {
+			l.Error("Field \""+ctx.Field.Name+"\" is not has size<="+numberString+
+				" ("+errorString+")")
 			return false, l.ErrorQueue
 		}
 	default:
@@ -419,6 +504,22 @@ func Validate(s interface{}, errorString string) (bool, error) {
 				if !result {
 					status = false
 				}
+			} else if tag == "cpf" {
+				result, err := validateCpf(ctx, errorString)
+				if err != nil {
+					l.Stack(err.(LoggerErrorQueue))
+				}
+				if !result {
+					status = false
+				}
+			} else if tag == "phone" {
+				result, err := validatePhone(ctx, errorString)
+				if err != nil {
+					l.Stack(err.(LoggerErrorQueue))
+				}
+				if !result {
+					status = false
+				}
 			} else if tag == "ip" {
 				result, err := validateIP(ctx, errorString)
 				if err != nil {
@@ -468,7 +569,15 @@ func Validate(s interface{}, errorString string) (bool, error) {
 					status = false
 				}
 			} else {
-				if MustIfTagRegex.MatchString(tag) {
+				if SizeLETagRegex.MatchString(tag) {
+					result, err := validateSizeLE(ctx, tag, errorString)
+					if err != nil {
+						l.Stack(err.(LoggerErrorQueue))
+					}
+					if !result {
+						status = false
+					}
+				} else if MustIfTagRegex.MatchString(tag) {
 					result, err := validateMustIf(ctx, tag, errorString)
 					if err != nil {
 						l.Stack(err.(LoggerErrorQueue))

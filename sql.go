@@ -3,6 +3,7 @@ package jda
 import (
 	"reflect"
 	"database/sql"
+	"fmt"
 )
 
 func SelectOneFromSqlTable(
@@ -24,6 +25,7 @@ func SelectOneFromSqlTable(
 	if queryExpression != "" {
 		expression = expression+" WHERE "+queryExpression
 	}
+	l.Log(expression)
 
 	rows, err := database.Query(expression, args...)
 	if err != nil {
@@ -51,7 +53,7 @@ func SelectOneFromSqlTable(
 	*id = 0
 	var idInter interface{} = id
 	if rows.Next() {
-		err = rows.Scan(append(idInter, outputFields)...)
+		err = rows.Scan(append(outputFields, idInter)...)
 		if err != nil {
 			l.Error(err.Error())
 			l.Error("Error in scan fields to SQL select query row")
@@ -69,18 +71,19 @@ func SelectFromSqlTable(
 	tableName string,
 	queryExpression string,
 	args ...interface{},
-) ([]int, [][]interface{}, error) {
+) ([]int, []interface{}, error) {
 	l := GetLogger()
 
 	if tableName == "" {
 		l.Error("Table name is null")
-		return false, l.ErrorQueue
+		return nil, nil, l.ErrorQueue
 	}
 
 	expression := "SELECT * FROM "+tableName
 	if queryExpression != "" {
 		expression = expression+" WHERE "+queryExpression
 	}
+	l.Log(expression)
 
 	rows, err := database.Query(expression, args...)
 	if err != nil {
@@ -89,41 +92,43 @@ func SelectFromSqlTable(
 		return nil, nil, l.ErrorQueue
 	}
 
-	structValue := reflect.Indirect(reflect.ValueOf(templateInterface))
-
-	length := structValue.NumField()
-	if length == 0 {
-		l.Error("Empty interface")
-		return nil, nil, l.ErrorQueue
-	}
-
-	var templateFields []interface{} = nil
-	for i := 0; i < length; i = i + 1 {
-		templateFields = append(
-			templateFields,
-			structValue.Field(i).Addr().Interface(),
-		)
-	}
-	
-	var outputFieldsArray [][]interface{} = nil
-	var outputIds []int 
+	var outputFieldsArray []interface{} = nil
+	var outputIds []int
 	for rows.Next() {
-		buffer := make([]interface{}, len(templateFields))
-		copy(buffer, templateFields)
+		l.Log("row")
+		//rowInter := CloneInterface(templateInterface)
+		//rowInter := templateInterface
+		rowInter := CloneInterface(templateInterface)
+		fmt.Println(rowInter)
+	//rowInter := reflect.ValueOf(reflect.New(reflect.TypeOf(reflect.Indirect(reflect.ValueOf(templateInterface))).Elem())).Interface()
+		//rowInter := reflect.Indirect(reflect.ValueOf(reflect.New(reflect.TypeOf(templateInterface).Elem()))).Interface()
+		rowValue := reflect.Indirect(reflect.ValueOf(templateInterface))
+
+		var rowFields []interface{} = nil
+		length := rowValue.NumField()
+		for i := 0; i < length; i = i + 1 {
+			rowFields = append(
+				rowFields,
+				rowValue.Field(i).Addr().Interface(),
+			)
+		}
 
 		var id int = 0
 		var idTemplate interface{} = &id
-		err = rows.Scan(append(idTemplate, buffer)...)
+		err = rows.Scan(append([]interface{}{idTemplate}, rowFields...)...)
 		if err != nil {
 			l.Error(err.Error())
 			l.Error("Error in scan fields to SQL select query row")
 			return nil, nil, l.ErrorQueue
 		}
-		
+
 		outputIds = append(outputIds, id)
-		outputFieldsArray = append(outputFieldsArray, buffer)
+		outputFieldsArray = append(
+			outputFieldsArray,
+			reflect.Indirect(reflect.ValueOf(rowInter)).Interface(),
+		)
 	}
-	
+
 	return outputIds, outputFieldsArray, nil
 }
 
