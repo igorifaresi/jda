@@ -29,7 +29,8 @@ func StorageGetStructOnPosition(
 	structValue := reflect.Indirect(reflect.ValueOf(outputInter))
 	length := structValue.NumField()
 	for i := 0; i < length; i = i + 1 {
-		fieldInter := structValue.Field(i).Interface()
+		value := structValue.Field(i)
+		fieldInter := value.Interface()
 		switch ty := fieldInter.(type) {
 		case int:
 			var number int
@@ -40,7 +41,7 @@ func StorageGetStructOnPosition(
 				fileMutex.Unlock()
 				return l.ErrorQueue
 			}
-			reflect.ValueOf(fieldInter).Set(reflect.ValueOf(number))
+			value.Set(reflect.ValueOf(number))
 		case int32:
 			var number int32
 			_, err := f.Read((*(*[4]byte)(unsafe.Pointer(&number)))[:])
@@ -50,7 +51,7 @@ func StorageGetStructOnPosition(
 				fileMutex.Unlock()
 				return l.ErrorQueue
 			}
-			reflect.ValueOf(fieldInter).Set(reflect.ValueOf(number))
+			value.Set(reflect.ValueOf(number))
 		case int64:
 			var number int64
 			_, err := f.Read((*(*[8]byte)(unsafe.Pointer(&number)))[:])
@@ -60,7 +61,7 @@ func StorageGetStructOnPosition(
 				fileMutex.Unlock()
 				return l.ErrorQueue
 			}
-			reflect.ValueOf(fieldInter).Set(reflect.ValueOf(number))
+			value.Set(reflect.ValueOf(number))
 		case uint:
 			var number uint
 			_, err := f.Read((*(*[unsafe.Sizeof(number)]byte)(unsafe.Pointer(&number)))[:])
@@ -70,7 +71,7 @@ func StorageGetStructOnPosition(
 				fileMutex.Unlock()
 				return l.ErrorQueue
 			}
-			reflect.ValueOf(fieldInter).Set(reflect.ValueOf(number))
+			value.Set(reflect.ValueOf(number))
 		case uint32:
 			var number uint32
 			_, err := f.Read((*(*[4]byte)(unsafe.Pointer(&number)))[:])
@@ -80,7 +81,7 @@ func StorageGetStructOnPosition(
 				fileMutex.Unlock()
 				return l.ErrorQueue
 			}
-			reflect.ValueOf(fieldInter).Set(reflect.ValueOf(number))
+			value.Set(reflect.ValueOf(number))
 		case uint64:
 			var number uint64
 			_, err := f.Read((*(*[8]byte)(unsafe.Pointer(&number)))[:])
@@ -90,7 +91,7 @@ func StorageGetStructOnPosition(
 				fileMutex.Unlock()
 				return l.ErrorQueue
 			}
-			reflect.ValueOf(fieldInter).Set(reflect.ValueOf(number))
+			value.Set(reflect.ValueOf(number))
 		case []byte:
 			dataLength := uint64(0)
 			_, err := f.Read((*(*[8]byte)(unsafe.Pointer(&dataLength)))[:])
@@ -108,7 +109,7 @@ func StorageGetStructOnPosition(
 				fileMutex.Unlock()
 				return l.ErrorQueue
 			}
-			reflect.ValueOf(fieldInter).Set(reflect.ValueOf(buffer))
+			value.Set(reflect.ValueOf(buffer))
 		case string:
 			dataLength := uint64(0)
 			_, err := f.Read((*(*[8]byte)(unsafe.Pointer(&dataLength)))[:])
@@ -126,7 +127,7 @@ func StorageGetStructOnPosition(
 				fileMutex.Unlock()
 				return l.ErrorQueue
 			}
-			reflect.ValueOf(fieldInter).Set(reflect.ValueOf(string(buffer)))
+			value.Set(reflect.ValueOf(string(buffer)))
 		default:
 			l.Error("Invalid type "+fmt.Sprint(ty))
 			fileMutex.Unlock()
