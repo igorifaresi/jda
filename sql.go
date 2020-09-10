@@ -3,7 +3,6 @@ package jda
 import (
 	"reflect"
 	"database/sql"
-	"fmt"
 )
 
 func SelectOneFromSqlTable(
@@ -95,14 +94,8 @@ func SelectFromSqlTable(
 	var outputFieldsArray []interface{} = nil
 	var outputIds []int
 	for rows.Next() {
-		l.Log("row")
-		//rowInter := CloneInterface(templateInterface)
-		//rowInter := templateInterface
-		rowInter := CloneInterface(templateInterface)
-		fmt.Println(rowInter)
-	//rowInter := reflect.ValueOf(reflect.New(reflect.TypeOf(reflect.Indirect(reflect.ValueOf(templateInterface))).Elem())).Interface()
-		//rowInter := reflect.Indirect(reflect.ValueOf(reflect.New(reflect.TypeOf(templateInterface).Elem()))).Interface()
-		rowValue := reflect.Indirect(reflect.ValueOf(templateInterface))
+		rowInter := templateInterface
+		rowValue := reflect.Indirect(reflect.ValueOf(rowInter))
 
 		var rowFields []interface{} = nil
 		length := rowValue.NumField()
