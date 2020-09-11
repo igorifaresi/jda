@@ -34,26 +34,43 @@ func SyslogGetLogs(whatcher *SyslogLoggerWatcher) string {
 }
 
 func SyslogWhatchLogs(whatcher *SyslogLoggerWatcher) {
-	l, err := net.Listen("tcp", ":4000")
-	if err != nil {
-			fmt.Println(err)
-			return
-	}
-	defer l.Close()
+	handleConnection := func(whatcher *SyslogLoggerWatcher, connection net.Conn) {
+		output := ""
 
-	c, err := l.Accept()
-	if err != nil {
-			fmt.Println(err)
-			return
-	}
+		for {
+			buffer := make([]byte, 128)
+			qnt, err := connection.Read(buffer[:])
+			goOut := false
+			if err != nil {
+				goOut = true
+			}
 
-	for {
-		buffer := make([]byte, 1)
-		c.Read(buffer[:])
+			output = output+string(buffer[:qnt])
+
+			if goOut {
+				break
+			}
+		}
 
 		whatcher.ReadMutex.Lock()
-		whatcher.Data = whatcher.Data+string(buffer)
+		whatcher.Data = whatcher.Data+output
 		whatcher.HasNew = true
 		whatcher.ReadMutex.Unlock()
+	}
+
+	listener, err := net.Listen("tcp", ":4000")
+	if err != nil {
+			fmt.Println(err)
+			return
+	}
+	defer listener.Close()
+
+	for {
+		connection, err := listener.Accept()
+        if err != nil {
+            continue
+		}
+
+		go handleConnection(whatcher, connection)
 	}
 }

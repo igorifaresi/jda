@@ -28,6 +28,7 @@ var IPRegex = regexp.MustCompile(`^(`+
 var FileModeRegex = regexp.MustCompile(`^([0])([0-7])([0-7])([0-7])$`)
 var DirectoryRegex = regexp.MustCompile(`(([\w])*([\\]))*$`)
 
+var NumberGTTagRegex = regexp.MustCompile(`^(>)(-)?([0-9])+$`)
 var SizeLETagRegex = regexp.MustCompile(`^(size<=)([0-9])+$`)
 var MustIfTagRegex = regexp.MustCompile(`^(must-if\()(\w)+(\))([=])(\w|[|])*$`)
 var NotMustIfTagRegex = regexp.MustCompile(`^(!must-if\()(\w)+(\))([=])(\w|[|])*$`)
@@ -291,6 +292,40 @@ func validateFileName(ctx ValidateFieldContext, errorString string) (bool, error
 		}
 	default:
 		l.Error("Invalid type for \""+ctx.Field.Name+"\" field, expected string ("+
+			errorString+")")
+		return false, l.ErrorQueue
+	}
+
+	return true, nil
+}
+
+// syntax:
+//   >number
+//
+// Check if the field is a string, and if the size if lower grater than number
+// after ">" symbol. Between symbol ">" and the number whitespaces are not allowed.
+//
+// examples:
+//   >1
+//   >-1
+//   >3
+//   >0
+func validateNumberGT(ctx ValidateFieldContext, tag, errorString string) (bool, error) {
+	l := GetLogger()
+
+	//get the number
+	numberString := strings.Split(tag, ">")[1]
+	number, _ := strconv.ParseInt(numberString, 10, 64)
+
+	switch ctx.Inter.(type) {
+	case int:
+		if !(ctx.Inter.(int) > int(number)) {
+			l.Error("Field \""+ctx.Field.Name+"\" is not >"+numberString+
+				" ("+errorString+")")
+			return false, l.ErrorQueue
+		}
+	default:
+		l.Error("Invalid type for \""+ctx.Field.Name+"\" field, expected int ("+
 			errorString+")")
 		return false, l.ErrorQueue
 	}
@@ -569,7 +604,15 @@ func Validate(s interface{}, errorString string) (bool, error) {
 					status = false
 				}
 			} else {
-				if SizeLETagRegex.MatchString(tag) {
+				if NumberGTTagRegex.MatchString(tag) {
+					result, err := validateNumberGT(ctx, tag, errorString)
+					if err != nil {
+						l.Stack(err.(LoggerErrorQueue))
+					}
+					if !result {
+						status = false
+					}
+				} else if SizeLETagRegex.MatchString(tag) {
 					result, err := validateSizeLE(ctx, tag, errorString)
 					if err != nil {
 						l.Stack(err.(LoggerErrorQueue))
