@@ -508,6 +508,25 @@ func Validate(s interface{}, errorString string) (bool, error) {
 	status := true
 	v := reflect.ValueOf(s)
 
+	if v.Kind() == reflect.Slice {
+		length := v.Len()
+		fmtIdx := GetFmtIndexer(length)
+		status := true
+		for i := 0; i < length; i = i + 1 {
+			it := v.Index(i).Interface()
+			isValid, err := Validate(
+				it,
+				"in struct validation "+fmtIdx.Format(i),
+			)
+			if !isValid {
+				l.Stack(err.(LoggerErrorQueue))
+				l.Error("Invalid structure data")
+				status = false
+			}
+		}
+		return status, nil
+	}
+
 	length := v.NumField()
 	for i := 0; i < length; i = i + 1 {
 		ctx := ValidateFieldContext{}

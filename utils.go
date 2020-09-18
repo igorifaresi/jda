@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strings"
 	"io/ioutil"
+	"net/http"
 )
 
 func ProcessCurlyBracketsMacros(
@@ -47,6 +48,30 @@ func ProcessCurlyBracketsMacros(
 	return output, nil
 }
 
+func Concatenate3Slices(a, b, c []byte) []byte {
+	lengthA := len(a)
+	lengthB := len(b)
+	lengthC := len(c)
+
+	output := make([]byte, lengthA+lengthB+lengthC)
+
+	for i := 0; i < lengthA; i = i + 1 {
+		output[i] = a[i]
+	}
+
+	tmp := lengthA
+	for i := 0; i < lengthB; i = i + 1 {
+		output[tmp+i] = b[i]
+	}
+
+	tmp = tmp+lengthB
+	for i := 0; i < lengthC; i = i + 1 {
+		output[tmp+i] = c[i]
+	}
+
+	return output
+}
+
 func GetStringInBetween(source string, start string, end string) string {
     initIndex := strings.Index(source, start)
     if initIndex == -1 {
@@ -59,6 +84,14 @@ func GetStringInBetween(source string, start string, end string) string {
 	}
 	endIndex = endIndex + initIndex
     return source[initIndex:endIndex]
+}
+
+func HttpGetIP(r *http.Request) string {
+	forwarded := r.Header.Get("X-FORWARDED-FOR")
+	if forwarded != "" {
+		return forwarded
+	}
+	return r.RemoteAddr
 }
 
 func GetStructFromFileJsonAndValidate(fileName string, s interface{}) error {
