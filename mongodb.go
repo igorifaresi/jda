@@ -136,7 +136,7 @@ func MongoFindOne(
 func MongoUpdateOne(
 	database *mongo.Database,
 	query interface{},
-	toUpdate interface{},
+	toUpdate bson.M,
 	collectionName string,
 ) error {
 	l := GetLogger()
@@ -157,7 +157,16 @@ func MongoUpdateOne(
 		return l.ErrorQueue
 	}
 
-	collection.FindOneAndUpdate(context.TODO(), queryData, toUpdateData)
+	_, err = collection.UpdateOne(
+		context.TODO(),
+		queryData,
+		toUpdateData,
+	)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error("Unable to update struct")
+		return l.ErrorQueue
+	}
 
 	return nil
 }
