@@ -170,3 +170,56 @@ func MongoUpdateOne(
 
 	return nil
 }
+
+func MongoAggregate(
+	database *mongo.Database,
+	query []bson.M,
+	output interface{},
+	collectionName string,
+) error {
+	l := GetLogger()
+
+	collection := database.Collection(collectionName)
+
+	cursor, err := collection.Aggregate(context.TODO(), query)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error("Error in find elements in database")
+		return l.ErrorQueue
+	}
+
+	err = cursor.All(context.TODO(), output)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error("Unable to decode the data to interface")
+		return l.ErrorQueue
+	}
+
+	return nil
+}
+
+func MongoCount(
+	database *mongo.Database,
+	s interface{},
+	collectionName string,
+) (int64, error) {
+	l := GetLogger()
+
+	collection := database.Collection(collectionName)
+
+	data, err := bson.Marshal(s)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error("Unable to convert struct interface to bson")
+		return 0, l.ErrorQueue
+	}
+
+	qnt, err := collection.CountDocuments(context.TODO(), data)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error("Error in find and decode one element in database")
+		return 0, l.ErrorQueue
+	}
+
+	return qnt, nil
+}
