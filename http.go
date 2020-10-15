@@ -13,7 +13,7 @@ type HttpRequestContext struct {
 
 type HttpHandleGETFunc func(HttpRequestContext, error) (int, string)
 type HttpHandlePOSTFunc func(HttpRequestContext, []byte, error) (int, string)
-type HttpHandleWithoutErrorsPOSTFunc func(HttpRequestContext, []byte, error) (int, string)
+type HttpHandleWithoutErrorsPOSTFunc func(HttpRequestContext, []byte) (int, string)
 
 type HttpMiddlewareFunc func(http.HandlerFunc) http.HandlerFunc
 
