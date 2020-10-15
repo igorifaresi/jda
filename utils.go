@@ -7,7 +7,17 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 )
+
+func StartLoggerTimer() {
+	for {
+		time.Sleep(time.Minute)
+		TimestampMutex.Lock()
+		Timestamp = time.Now().Format("02/01 15:04")
+		TimestampMutex.Unlock()
+	}
+}
 
 func Getenv(variableName string) string {
 	l := GetLogger()
