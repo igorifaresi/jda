@@ -20,7 +20,15 @@ type HttpMiddlewareFunc func(http.HandlerFunc) http.HandlerFunc
 var DefaultHttpMiddlewareFunc HttpMiddlewareFunc = nil
 
 func HttpListenEnvPort() {
-	http.ListenAndServe(":"+os.Getenv("PORT"), nil) //Look this better, can have error check
+	l := GetLogger()
+	
+	port := os.Getenv("PORT")
+	if port == "" {
+		l.Error("env variable PORT is null")
+		return
+	}
+	
+	http.ListenAndServe(":"+port, nil) //Look this better, can have error check
 }
 
 func HttpHandleGET(path string, handled HttpHandleGETFunc) {
