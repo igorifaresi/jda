@@ -6,7 +6,20 @@ import (
 	"strings"
 	"io/ioutil"
 	"net/http"
+	"os"
 )
+
+func Getenv(variableName string) string {
+	l := GetLogger()
+	
+	v := os.Getenv(variableName)
+	if v == "" {
+		l.Error("env variable "+variableName+" not found")
+		os.Exit(1)
+	}
+	
+	return v
+}
 
 func ProcessCurlyBracketsMacros(
 	macroMap map[string]string,
