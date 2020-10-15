@@ -116,7 +116,7 @@ func HttpHandleWithoutErrorsPOST(path string, handled HttpHandleWithoutErrorsPOS
 				l.Error("Error in parsing body")
 				l.ErrorQueue.PrintErrors()
 
-				statusCode = 400
+				statusCode = 500
 				output = "Internal error"
 			} else {
 				statusCode, output = handled(ctx, body)
