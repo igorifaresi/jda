@@ -25,6 +25,7 @@ func Getenv(variableName string) string {
 	v := os.Getenv(variableName)
 	if v == "" {
 		l.Error("env variable "+variableName+" not found")
+		l.ErrorQueue.DumpErrors()
 		os.Exit(1)
 	}
 	
