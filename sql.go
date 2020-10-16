@@ -5,7 +5,7 @@ import (
 	"database/sql"
 )
 
-func SelectOneFromSqlTable(
+func SqlSelectOne(
 	database *sql.DB,
 	id *int,
 	outputInterface interface{},
@@ -64,7 +64,7 @@ func SelectOneFromSqlTable(
 	return false, nil
 }
 
-func SelectFromSqlTable(
+func SqlSelect(
 	database *sql.DB,
 	templateInterface interface{},
 	tableName string,
@@ -125,7 +125,7 @@ func SelectFromSqlTable(
 	return outputIds, outputFieldsArray, nil
 }
 
-func InsertIntoSqlTable(database *sql.DB, s interface{}, tableName string) error {
+func SqlInsert(database *sql.DB, s interface{}, tableName string) error {
 	l := GetLogger()
 
 	if tableName == "" {
@@ -181,7 +181,7 @@ func InsertIntoSqlTable(database *sql.DB, s interface{}, tableName string) error
 	return nil
 }
 
-func CreateSqlTable(database *sql.DB, s interface{}, tableName string) error {
+func SqlCreateTable(database *sql.DB, s interface{}, tableName string) error {
 	l := GetLogger()
 
 	if tableName == "" {
