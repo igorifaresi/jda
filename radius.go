@@ -2,7 +2,6 @@ package jda
 
 import (
 	"context"
-	"log"
 
 	"layeh.com/radius"
 	"layeh.com/radius/rfc2865"
