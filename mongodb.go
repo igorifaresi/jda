@@ -2,8 +2,8 @@ package jda
 
 import (
 	"context"
-    "go.mongodb.org/mongo-driver/mongo"
-    "go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -56,6 +56,41 @@ func MongoInsert(
 	if err != nil {
 		l.Error(err.Error())
 		l.Error("Unable to insert element in mongodb database")
+		return l.ErrorQueue
+	}
+
+	return nil
+}
+
+func MongoGetAll(
+	database *mongo.Database,
+	outputArray interface{},
+	collectionName string,
+	optionsArg ...*options.FindOptions,
+) error {
+	l := GetLogger()
+
+	collection := database.Collection(collectionName)
+	
+	var findOptions *options.FindOptions
+	if len(optionsArg) == 0 || optionsArg[0] == nil {
+		findOptions = options.Find()
+	} else {
+		findOptions = optionsArg[0]
+	}
+	findOptions.SetLimit(max)
+	
+	cursor, err := collection.Find(context.TODO(), bson.D{{}}, findOptions)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error("Error in get all elements in collection")
+		return l.ErrorQueue
+	}
+
+	err = cursor.All(context.TODO(), outputArray)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error("Unable to decode the data to interface")
 		return l.ErrorQueue
 	}
 
