@@ -78,7 +78,6 @@ func MongoGetAll(
 	} else {
 		findOptions = optionsArg[0]
 	}
-	findOptions.SetLimit(max)
 	
 	cursor, err := collection.Find(context.TODO(), bson.D{{}}, findOptions)
 	if err != nil {
