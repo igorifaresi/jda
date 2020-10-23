@@ -205,6 +205,44 @@ func MongoUpdateOne(
 	return nil
 }
 
+func MongoUpdateMany(
+	database *mongo.Database,
+	query interface{},
+	toUpdate bson.M,
+	collectionName string,
+) error {
+	l := GetLogger()
+
+	collection := database.Collection(collectionName)
+
+	queryData, err := bson.Marshal(query)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error("Unable to convert query struct interface to bson")
+		return l.ErrorQueue
+	}
+
+	toUpdateData, err := bson.Marshal(toUpdate)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error("Unable to convert to update struct interface to bson")
+		return l.ErrorQueue
+	}
+
+	_, err = collection.UpdateMany(
+		context.TODO(),
+		queryData,
+		toUpdateData,
+	)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error("Unable to update structs")
+		return l.ErrorQueue
+	}
+
+	return nil
+}
+
 func MongoAggregate(
 	database *mongo.Database,
 	query []bson.M,
