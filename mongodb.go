@@ -258,3 +258,34 @@ func MongoCount(
 
 	return qnt, nil
 }
+
+func MongoDeleteOne(
+	database *mongo.Database,
+	s interface{},
+	collectionName string,
+) error {
+	l := GetLogger()
+
+	collection := database.Collection(collectionName)
+
+	data, err := bson.Marshal(s)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error("Unable to convert struct interface to bson")
+		return l.ErrorQueue
+	}
+
+	resp, err := collection.DeleteOne(context.TODO(), data)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error("Error in delete one element in database")
+		return l.ErrorQueue
+	}
+	
+	if resp.DeletedCount == 0 {
+		l.Error("No one was deleted")
+		return l.ErrorQueue
+	}
+
+	return nil
+}
