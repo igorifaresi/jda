@@ -339,7 +339,7 @@ func MongoDictionaryGet(
 	cursor, err := collection.Find(context.TODO(), bson.M{ "key": key })
 	if err != nil {
 		l.Error(err.Error())
-		l.Error("Error in get all elements in collection")
+		l.Error("Error in get entry for key \""+key+"\" in collection")
 		return false, "", l.ErrorQueue
 	}
 	
@@ -379,3 +379,61 @@ func MongoDictionaryGet(
 	
 	return true, stringValue, nil
 }
+
+func MongoDictionarySet(
+	database *mongo.Database,
+	key string,
+	value string,
+	collectionName string,
+) error {
+	l := GetLogger()
+
+	collection := database.Collection(collectionName)
+	
+	cursor, err := collection.Find(context.TODO(), bson.M{ "key": key })
+	if err != nil {
+		l.Error(err.Error())
+		l.Error("Error in get entry for key \""+key+"\" in collection")
+		return l.ErrorQueue
+	}
+	
+	var output []map[string]interface{}
+	err = cursor.All(context.TODO(), output)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error("Unable to decode the data to interface")
+		return l.ErrorQueue
+	}
+	
+	if len(output) > 1 {
+		l.Error("Duplicate entries for key \""+key+"\" try creating a"+
+			" unique index for \"key\" field, or use jda.MongoDictionaryInit function")
+		return l.ErrorQueue
+	}
+	
+	if len(output) >= 0 {
+		_, err = collection.UpdateMany(
+			context.TODO(),
+			bson.M{ "$match": bson.M{ "key": key }},
+			bson.M{ "$set": bson.M{ "value": value }},
+		)
+		if err != nil {
+			l.Error(err.Error())
+			l.Error("Unable to update entry")
+			return l.ErrorQueue
+		}
+	} else {
+		_, err = collection.InsertOne(context.TODO(), bson.M{ 
+			"key": key,
+			"value": value,
+		})
+		if err != nil {
+			l.Error(err.Error())
+			l.Error("Unable to create entry")
+			return l.ErrorQueue
+		}
+	}
+	
+	return nil
+}
+
