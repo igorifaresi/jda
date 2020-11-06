@@ -326,3 +326,56 @@ func MongoDeleteOne(
 
 	return nil
 }
+
+func MongoDictionaryGet(
+	database *mongo.Database,
+	key string,
+	collectionName string,
+) (bool, string, error) {
+	l := GetLogger()
+
+	collection := database.Collection(collectionName)
+	
+	cursor, err := collection.Find(context.TODO(), bson.M{ "key": key })
+	if err != nil {
+		l.Error(err.Error())
+		l.Error("Error in get all elements in collection")
+		return false, "", l.ErrorQueue
+	}
+	
+	var output []map[string]interface{}
+	err = cursor.All(context.TODO(), output)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error("Unable to decode the data to interface")
+		return false, "", l.ErrorQueue
+	}
+	
+	if len(output) == 0 {
+		false, "", nil
+	}
+	
+	if len(output) > 1 {
+		l.Error("Duplicate entries for key \""+key+"\" try creating a"+
+			" unique index for \"key\" field, or use jda.MongoDictionaryInit function")
+		return false, "", l.ErrorQueue
+	}
+			
+	value, ok := output[0]["value"]
+	if !ok {
+		l.Error("Broken entry, missing field \"value\" for key \""+key+"\"")
+		return false, "", l.ErrorQueue
+	}
+	
+	stringValue := ""
+	switch value.(type) {
+	case string:
+		stringValue = value.(string)
+	default:
+		l.Error("Broken entry field \"value\" for key \""+key+"\","+
+			" the field need to be a string")
+		return false, "", l.ErrorQueue
+	}
+	
+	return true, stringValue, nil
+}
