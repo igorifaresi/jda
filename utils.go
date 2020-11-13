@@ -8,7 +8,18 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"fmt"
+	"runtime"
 )
+
+func Yay() {
+	_, fileName, fileLine, ok := runtime.Caller(1)
+	if ok {
+		fmt.Printf("%s:%d yay\n", fileName, fileLine)
+		return
+	}
+	fmt.Printf("yay\n")
+}
 
 func StartLoggerTimer() {
 	for {
