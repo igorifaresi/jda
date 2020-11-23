@@ -352,7 +352,7 @@ func MongoDictionaryGet(
 	}
 	
 	if len(output) == 0 {
-		false, "", nil
+		return false, "", nil
 	}
 	
 	if len(output) > 1 {
