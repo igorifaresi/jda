@@ -49,6 +49,7 @@ func GetenvInt(variableName string) int {
 	v := Getenv(variableName)
 	number, err := strconv.ParseInt(v, 10, 64)
 	if err != nil {
+		l.Error(err.Error())
 		l.Error("env variable "+variableName+" is not a valid integer")
 		l.ErrorQueue.DumpErrors()
 		os.Exit(1)
