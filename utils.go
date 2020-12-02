@@ -43,6 +43,20 @@ func Getenv(variableName string) string {
 	return v
 }
 
+func GetenvInt(variableName string) int {
+	l := GetLogger()
+	
+	v := Getenv(variableName)
+	number, err := strconv.ParseInt(v, 10, 64)
+	if err != nil {
+		l.Error("env variable "+variableName+" is not a valid integer")
+		l.ErrorQueue.DumpErrors()
+		os.Exit(1)
+		return 0
+	}
+	return int(number)
+}
+
 func ProcessCurlyBracketsMacros(
 	macroMap map[string]string,
 	source string,
