@@ -96,7 +96,7 @@ func GetLogger(customLocation ...string) Logger {
 		f := runtime.FuncForPC(pc[0])
 		location = f.Name()
 	} else {
-		location = customLocation[0]
+		location = "\""+customLocation[0]+"\""
 	}
 
 	//add the track id
