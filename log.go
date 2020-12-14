@@ -87,12 +87,17 @@ type Logger struct {
 
 type LoggerDumpCallbackFunc func([]LoggerError)
 
-func GetLogger() Logger {
-	//get runtime information
-	pc := make([]uintptr, 10)
-    runtime.Callers(2, pc)
-	f := runtime.FuncForPC(pc[0])
-	location := f.Name()
+func GetLogger(customLocation ...string) Logger {
+	var location string
+	if len(customLocation) == 0 {
+		//get runtime information
+		pc := make([]uintptr, 10)
+		runtime.Callers(2, pc)
+		f := runtime.FuncForPC(pc[0])
+		location = f.Name()
+	} else {
+		location = customLocation[0]
+	}
 
 	//add the track id
 	idCounterMutex.Lock()
