@@ -60,7 +60,7 @@ func (q LoggerErrorQueue) Error() string {
 	return output
 }
 
-func (q *LoggerErrorQueue) DumpErrors() { //maybe make this return data
+func (q *LoggerErrorQueue) DumpErrors(args ...interface{}) { //maybe make this return data
 	for _, loggerError := range q.Queue {
 		fmt.Println("\033[0;31m"+loggerError.Timestamp+" "+loggerError.Stamp+
 			" ERR\033[0m "+loggerError.Content)
@@ -71,7 +71,7 @@ func (q *LoggerErrorQueue) DumpErrors() { //maybe make this return data
 	q.Queue = nil
 }
 
-func (q *LoggerErrorQueue) PrintErrors() {
+func (q *LoggerErrorQueue) PrintErrors(args ...interface{}) {
 	for _, loggerError := range q.Queue {
 		fmt.Println("\033[0;31m"+loggerError.Timestamp+" "+loggerError.Stamp+
 			" ERR\033[0m "+loggerError.Content)
@@ -85,7 +85,7 @@ type Logger struct {
 	ErrorQueue LoggerErrorQueue
 }
 
-type LoggerDumpCallbackFunc func([]LoggerError)
+type LoggerDumpCallbackFunc func([]LoggerError, ...interface{})
 
 func GetLogger(customLocation ...string) Logger {
 	var location string
