@@ -66,12 +66,12 @@ func (q *LoggerErrorQueue) DumpErrors(args ...interface{}) { //maybe make this r
 			" ERR\033[0m "+loggerError.Content)
 	}
 	if DefaultLoggerDumpCallbackFunc != nil {
-		DefaultLoggerDumpCallbackFunc(q.Queue)
+		DefaultLoggerDumpCallbackFunc(q.Queue, args)
 	}
 	q.Queue = nil
 }
 
-func (q *LoggerErrorQueue) PrintErrors(args ...interface{}) {
+func (q *LoggerErrorQueue) PrintErrors() {
 	for _, loggerError := range q.Queue {
 		fmt.Println("\033[0;31m"+loggerError.Timestamp+" "+loggerError.Stamp+
 			" ERR\033[0m "+loggerError.Content)
