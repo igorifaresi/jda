@@ -136,3 +136,11 @@ func HttpHandleWithoutErrorsPOST(path string, handled HttpHandleWithoutErrorsPOS
 		http.HandleFunc(path, DefaultHttpMiddlewareFunc(f))
 	}
 }
+
+func HttpGetQueryVariable(r *http.Request, variableName string) (string, bool) {
+	value, ok := r.URL.Query()[variableName]
+	if !ok || len(cpfQuery) < 1 {
+		return "", false
+	}
+	return value, true	
+}
