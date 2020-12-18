@@ -148,7 +148,7 @@ func HttpGetQueryVariable(r *http.Request, variableName string) (string, err) {
 	return values[0], nil	
 }
 
-func HttpGetQueryVariableInt(r *http.Request, variableName string) (int, err) {
+func HttpGetQueryVariableInt(r *http.Request, variableName string) (int64, err) {
 	l := GetLogger()
 	
 	values, ok := r.URL.Query()[variableName]
