@@ -137,10 +137,30 @@ func HttpHandleWithoutErrorsPOST(path string, handled HttpHandleWithoutErrorsPOS
 	}
 }
 
-func HttpGetQueryVariable(r *http.Request, variableName string) (string, bool) {
+func HttpGetQueryVariable(r *http.Request, variableName string) (string, err) {
+	l := GetLogger()
+	
 	values, ok := r.URL.Query()[variableName]
 	if !ok || len(values) < 1 {
-		return "", false
+		l.Error(`"`+variableName+`" query variable not found`)
+		return "", l.ErrorQueue
 	}
-	return values[0], true	
+	return values[0], nil	
+}
+
+func HttpGetQueryVariableInt(r *http.Request, variableName string) (int, err) {
+	l := GetLogger()
+	
+	values, ok := r.URL.Query()[variableName]
+	if !ok || len(values) < 1 {
+		l.Error(`"`+variableName+`" query variable not found`)
+		return 0, l.ErrorQueue
+	}
+	number, err := strconv.ParseInt(values[0], 10, 64)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error(`"`+variableName+`" query variable is not a valid integer`)
+		return 0, l.ErrorQueue
+	}
+	return number, nil
 }
