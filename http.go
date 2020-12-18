@@ -138,9 +138,9 @@ func HttpHandleWithoutErrorsPOST(path string, handled HttpHandleWithoutErrorsPOS
 }
 
 func HttpGetQueryVariable(r *http.Request, variableName string) (string, bool) {
-	value, ok := r.URL.Query()[variableName]
-	if !ok || len(cpfQuery) < 1 {
+	values, ok := r.URL.Query()[variableName]
+	if !ok || len(values) < 1 {
 		return "", false
 	}
-	return value, true	
+	return values[0], true	
 }
