@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"io/ioutil"
 	"os"
+	"strconv"
 )
 
 type HttpRequestContext struct {
@@ -137,7 +138,7 @@ func HttpHandleWithoutErrorsPOST(path string, handled HttpHandleWithoutErrorsPOS
 	}
 }
 
-func HttpGetQueryVariable(r *http.Request, variableName string) (string, err) {
+func HttpGetQueryVariable(r *http.Request, variableName string) (string, error) {
 	l := GetLogger()
 	
 	values, ok := r.URL.Query()[variableName]
@@ -148,7 +149,7 @@ func HttpGetQueryVariable(r *http.Request, variableName string) (string, err) {
 	return values[0], nil	
 }
 
-func HttpGetQueryVariableInt(r *http.Request, variableName string) (int64, err) {
+func HttpGetQueryVariableInt(r *http.Request, variableName string) (int64, error) {
 	l := GetLogger()
 	
 	values, ok := r.URL.Query()[variableName]
