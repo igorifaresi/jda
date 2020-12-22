@@ -15,17 +15,21 @@ type GETFunc func(Context) Dish
 type POSTFunc func(Context) Dish
 
 const (
-	ERROR_PRINT_NONE = iota
-	VERBOSE_PRINT
-	VERBOSE_DUMP
+	ERROR_NONE = iota
+	ERROR_PRINT
+	ERROR_DUMP
 )
-
-
+var ErrorMode int = ERROR_PRINT
+var Verbose bool = true
 
 func POST(path string, handled POSTFunc) {
 	l := GetLogger()
 
 	f := func(w http.ResponseWriter, r *http.Request) {
+		if Verbose {
+			l.Log(`POST request at "`+path+`" ip `+HttpGetIp(r))
+		}
+		
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
@@ -34,8 +38,14 @@ func POST(path string, handled POSTFunc) {
 		case "POST":
 			body, err := ioutil.ReadAll(r.Body)
 			if err != nil {
-				if 
-				l.Error("Error in parsing body")
+				if ErrorMode == ERROR_PRINT || ErrorMode == ERROR_DUMP {
+					l.Error("Error in parse request body")
+				}
+				if ErrorMode == ERROR_PRINT {
+					l.ErrorQueue.PrintErrors()	
+				} else if ErrorMode == ERROR_DUMP {
+					l.ErrorQueue.DumpErrors()
+				}
 				w.WriteHeader(500)
 				w.Write("ifr.waiter: Error in parse request body")
 			}
