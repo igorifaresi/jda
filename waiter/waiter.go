@@ -1,5 +1,10 @@
 package waiter
 
+import (
+	"net/http"
+	"io/ioutil"
+)
+
 type Context struct {
 	W    http.ResponseWriter
 	R    *http.Request
