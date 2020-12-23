@@ -48,6 +48,14 @@ func Success(text string) Dish {
 	}
 }
 
+func GetQueryParam(paramName string) (string, error) {
+	return "", nil	
+}
+
+func GetQueryParamInt(paramName string) (string, error) {
+	return 0, nil	
+}
+
 func POST(path string, handled POSTFunc) {
 	l := GetLogger()
 
