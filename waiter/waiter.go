@@ -22,6 +22,27 @@ const (
 var ErrorMode int = ERROR_PRINT
 var Verbose bool = true
 
+func InternalError(text string) Dish {
+	return Dish{
+		Status: 500,
+		Text: "Internal error: "+text,
+	}
+}
+
+func BadRequest(text string) Dish {
+	return Dish{
+		Status: 400,
+		Text: "Bad request: "+text,
+	}
+}
+
+func Success(text string) Dish {
+	return Dish{
+		Status: 200,
+		Text: text,
+	}
+}
+
 func POST(path string, handled POSTFunc) {
 	l := GetLogger()
 
