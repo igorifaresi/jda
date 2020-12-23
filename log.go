@@ -50,6 +50,16 @@ type LoggerErrorQueue struct {
 	Queue []LoggerError
 }
 
+func (q LoggerErrorQueue) Error() string {
+	output := ""
+	for _, loggerError := range q.Queue {
+		output = output+"\033[0;31m"+loggerError.Timestamp+" "+loggerError.Stamp+
+			" ERR\033[0m "+loggerError.Content+"\n"
+	}
+	q.Queue = nil
+	return output
+}
+
 func (q *LoggerErrorQueue) Dump(args ...interface{}) {
 	for _, loggerError := range q.Queue {
 		fmt.Println("\033[0;31m"+loggerError.Timestamp+" "+loggerError.Stamp+
