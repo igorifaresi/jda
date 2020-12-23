@@ -50,17 +50,7 @@ type LoggerErrorQueue struct {
 	Queue []LoggerError
 }
 
-func (q LoggerErrorQueue) Error() string {
-	output := ""
-	for _, loggerError := range q.Queue {
-		output = output+"\033[0;31m"+loggerError.Timestamp+" "+loggerError.Stamp+
-			" ERR\033[0m "+loggerError.Content+"\n"
-	}
-	q.Queue = nil
-	return output
-}
-
-func (q *LoggerErrorQueue) DumpErrors(args ...interface{}) { //maybe make this return data
+func (q *LoggerErrorQueue) Dump(args ...interface{}) {
 	for _, loggerError := range q.Queue {
 		fmt.Println("\033[0;31m"+loggerError.Timestamp+" "+loggerError.Stamp+
 			" ERR\033[0m "+loggerError.Content)
@@ -71,7 +61,7 @@ func (q *LoggerErrorQueue) DumpErrors(args ...interface{}) { //maybe make this r
 	q.Queue = nil
 }
 
-func (q *LoggerErrorQueue) PrintErrors() {
+func (q *LoggerErrorQueue) Print() {
 	for _, loggerError := range q.Queue {
 		fmt.Println("\033[0;31m"+loggerError.Timestamp+" "+loggerError.Stamp+
 			" ERR\033[0m "+loggerError.Content)
@@ -133,8 +123,9 @@ func (l Logger) Warn(content string) {
 	fmt.Println("\033[0;33m"+getTimestamp()+" "+l.Stamp+" WARN\033[0m "+content)
 }
 
-func (l *Logger) Error(content string) {
+func (l *Logger) Error(content string) LoggerErrorQueue {
 	l.ErrorQueue.Queue = append(l.ErrorQueue.Queue, LoggerError{content, l.Stamp, getTimestamp()})
+	return l.ErrorQueue
 }
 
 func (l Logger) DebugLog(content string) {
