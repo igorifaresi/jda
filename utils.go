@@ -37,7 +37,7 @@ func Getenv(variableName string) string {
 	v := os.Getenv(variableName)
 	if v == "" {
 		l.Error("env variable "+variableName+" not found")
-		l.ErrorQueue.DumpErrors()
+		l.ErrorQueue.Dump()
 		os.Exit(1)
 	}
 	
@@ -52,7 +52,7 @@ func GetenvInt(variableName string) int {
 	if err != nil {
 		l.Error(err.Error())
 		l.Error("env variable "+variableName+" is not a valid integer")
-		l.ErrorQueue.DumpErrors()
+		l.ErrorQueue.Dump()
 		os.Exit(1)
 		return 0
 	}
