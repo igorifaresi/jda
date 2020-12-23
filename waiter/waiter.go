@@ -76,9 +76,9 @@ func POST(path string, handled POSTFunc) {
 					l.Error("Error in parse request body")
 				}
 				if ErrorMode == ERROR_PRINT {
-					l.ErrorQueue.PrintErrors()	
+					l.ErrorQueue.Print()	
 				} else if ErrorMode == ERROR_DUMP {
-					l.ErrorQueue.DumpErrors()
+					l.ErrorQueue.Dump()
 				}
 				w.WriteHeader(500)
 				w.Write("ifr.waiter: Error in parse request body")
