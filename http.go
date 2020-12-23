@@ -115,7 +115,7 @@ func HttpHandleWithoutErrorsPOST(path string, handled HttpHandleWithoutErrorsPOS
 			body, err := ioutil.ReadAll(r.Body)
 			if err != nil {
 				l.Error("Error in parsing body")
-				l.ErrorQueue.PrintErrors()
+				l.ErrorQueue.Print()
 
 				statusCode = 500
 				output = "Internal error"
