@@ -3,6 +3,7 @@ package waiter
 import (
 	"net/http"
 	"io/ioutil"
+	"github.com/igorifaresi/jda"
 )
 
 type Context struct {
@@ -52,16 +53,16 @@ func GetQueryParam(paramName string) (string, error) {
 	return "", nil	
 }
 
-func GetQueryParamInt(paramName string) (string, error) {
+func GetQueryParamInt(paramName string) (int, error) {
 	return 0, nil	
 }
 
 func POST(path string, handled POSTFunc) {
-	l := GetLogger()
+	l := jda.GetLogger()
 
 	f := func(w http.ResponseWriter, r *http.Request) {
 		if Verbose {
-			l.Log(`POST request at "`+path+`" ip `+HttpGetIp(r))
+			l.Log(`POST request at "`+path+`" ip `+jda.HttpGetIp(r))
 		}
 		
 		w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -81,7 +82,7 @@ func POST(path string, handled POSTFunc) {
 					l.ErrorQueue.Dump()
 				}
 				w.WriteHeader(500)
-				w.Write("ifr.waiter: Error in parse request body")
+				w.Write([]byte("ifr.waiter: Error in parse request body"))
 			}
 			dish := handled(Context{ W: w, R: r, Data: body })
 			w.WriteHeader(dish.Status)
@@ -92,9 +93,5 @@ func POST(path string, handled POSTFunc) {
 			w.WriteHeader(400)
 		}
 	}
-	if DefaultMiddleware == nil {
-		http.HandleFunc(path, f)
-	} else {
-		http.HandleFunc(path, DefaultMiddleware(f))
-	}
+	http.HandleFunc(path, f)
 }
