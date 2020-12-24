@@ -66,5 +66,5 @@ func Send(request Request) (Response, error) {
 	return Response{
 		Status: resp.StatusCode,
 		Text: string(body),
-	}
+	}, nil
 }
