@@ -97,6 +97,11 @@ func POST(path string, handled POSTFunc) {
 }
 
 func Listen() {
+	l := jda.GetLogger()
+	
 	port := jda.Getenv("PORT")
-	http.ListenAndServe(":"+port, nil)	
+	http.ListenAndServe(":"+port, nil)
+	if Verbose {
+		l.Log("Listen at "+port)	
+	}
 }
