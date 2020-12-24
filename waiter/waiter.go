@@ -95,3 +95,8 @@ func POST(path string, handled POSTFunc) {
 	}
 	http.HandleFunc(path, f)
 }
+
+func Listen() {
+	port := jda.Getenv("PORT")
+	http.ListenAndServe(":"+port, nil)	
+}
