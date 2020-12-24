@@ -62,7 +62,7 @@ func POST(path string, handled POSTFunc) {
 
 	f := func(w http.ResponseWriter, r *http.Request) {
 		if Verbose {
-			l.Log(`POST request at "`+path+`" ip `+jda.HttpGetIp(r))
+			l.Log(`POST request at "`+path+`" ip `+jda.HttpGetIP(r))
 		}
 		
 		w.Header().Set("Access-Control-Allow-Origin", "*")
