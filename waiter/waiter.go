@@ -54,7 +54,7 @@ func Success(text string) Dish {
 func GetQueryParameter(ctx Context, parameterName string) (string, error) {
 	l := GetLogger()
 	
-	values, ok := r.URL.Query()[parameterName]
+	values, ok := ctx.R.URL.Query()[parameterName]
 	if !ok || len(values) < 1 {
 		l.Error(`"`+parameterName+`" query parameter not found`)
 		return "", l.ErrorQueue
@@ -65,7 +65,7 @@ func GetQueryParameter(ctx Context, parameterName string) (string, error) {
 func GetQueryParameterInt(ctx Context, parameterName string) (int, error) {
 	l := GetLogger()
 	
-	values, ok := r.URL.Query()[parameterName]
+	values, ok := ctx.R.URL.Query()[parameterName]
 	if !ok || len(values) < 1 {
 		l.Error(`"`+parameterName+`" query parameter not found`)
 		return 0, l.ErrorQueue
