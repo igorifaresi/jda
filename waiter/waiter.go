@@ -52,7 +52,7 @@ func Success(text string) Dish {
 }
 
 func GetQueryParameter(ctx Context, parameterName string) (string, error) {
-	l := GetLogger()
+	l := jda.GetLogger()
 	
 	values, ok := ctx.R.URL.Query()[parameterName]
 	if !ok || len(values) < 1 {
@@ -63,7 +63,7 @@ func GetQueryParameter(ctx Context, parameterName string) (string, error) {
 }
 
 func GetQueryParameterInt(ctx Context, parameterName string) (int, error) {
-	l := GetLogger()
+	l := jda.GetLogger()
 	
 	values, ok := ctx.R.URL.Query()[parameterName]
 	if !ok || len(values) < 1 {
@@ -76,7 +76,7 @@ func GetQueryParameterInt(ctx Context, parameterName string) (int, error) {
 		l.Error(`"`+parameterName+`" query parameter is not a valid integer`)
 		return 0, l.ErrorQueue
 	}
-	return number, nil	
+	return int(number), nil	
 }
 
 func POST(path string, handled POSTFunc) {
@@ -126,8 +126,8 @@ func NewHostess(f func(POSTFunc) POSTFunc) Hostess {
 	return Hostess{ Generator: f }
 }
 
-func (hostess Hostess) POST(handled POSTFunc) {
-	POST(hostess.Generator(handled))
+func (hostess Hostess) POST(path string, handled POSTFunc) {
+	POST(path, hostess.Generator(handled))
 }
 
 func Listen() {
