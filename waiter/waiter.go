@@ -50,11 +50,11 @@ func Success(text string) Dish {
 	}
 }
 
-func GetQueryParam(paramName string) (string, error) {
+func GetQueryParameter(paramName string) (string, error) {
 	return "", nil	
 }
 
-func GetQueryParamInt(paramName string) (int, error) {
+func GetQueryParameterInt(paramName string) (int, error) {
 	return 0, nil	
 }
 
