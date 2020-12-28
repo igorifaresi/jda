@@ -11,7 +11,7 @@ type Context struct {
 	W       http.ResponseWriter
 	R       *http.Request
 	Data    []byte
-	Session string
+	Session map[string]interface{}
 }
 
 type Dish struct {
