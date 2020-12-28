@@ -7,9 +7,10 @@ import (
 )
 
 type Context struct {
-	W    http.ResponseWriter
-	R    *http.Request
-	Data []byte
+	W       http.ResponseWriter
+	R       *http.Request
+	Data    []byte
+	Session interface{}
 }
 
 type Dish struct {
