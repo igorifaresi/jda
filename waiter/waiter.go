@@ -3,6 +3,7 @@ package waiter
 import (
 	"net/http"
 	"io/ioutil"
+	"strconv"
 	"github.com/igorifaresi/jda"
 )
 
@@ -50,12 +51,32 @@ func Success(text string) Dish {
 	}
 }
 
-func GetQueryParameter(paramName string) (string, error) {
-	return "", nil	
+func GetQueryParameter(ctx Context, parameterName string) (string, error) {
+	l := GetLogger()
+	
+	values, ok := r.URL.Query()[parameterName]
+	if !ok || len(values) < 1 {
+		l.Error(`"`+parameterName+`" query parameter not found`)
+		return "", l.ErrorQueue
+	}
+	return values[0], nil
 }
 
-func GetQueryParameterInt(paramName string) (int, error) {
-	return 0, nil	
+func GetQueryParameterInt(ctx Context, parameterName string) (int, error) {
+	l := GetLogger()
+	
+	values, ok := r.URL.Query()[parameterName]
+	if !ok || len(values) < 1 {
+		l.Error(`"`+parameterName+`" query parameter not found`)
+		return 0, l.ErrorQueue
+	}
+	number, err := strconv.ParseInt(values[0], 10, 64)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error(`"`+parameterName+`" query parameter is not a valid integer`)
+		return 0, l.ErrorQueue
+	}
+	return number, nil	
 }
 
 func POST(path string, handled POSTFunc) {
