@@ -96,6 +96,18 @@ func POST(path string, handled POSTFunc) {
 	http.HandleFunc(path, f)
 }
 
+type Hostess struct {
+	Generator func(POSTFunc) POSTFunc 	
+}
+
+func NewHostess(f func(POSTFunc) POSTFunc) Hostess {
+	return Hostess{ Generator: f }
+}
+
+func (hostess Hostess) POST(handled POSTFunc) {
+	POST(hostess.Generator(handled))
+}
+
 func Listen() {
 	l := jda.GetLogger()
 	
