@@ -63,12 +63,12 @@ func (node *Node) MapAt(index uint) *Node {
 		return node
 	}
 	if !isMapOfInterfacesSlice(node.Value) {
-		node.Err = fmt.Errorf(`Cannot get map[string]interface{} `
+		node.Err = fmt.Errorf(`Cannot get map[string]interface{} `+
 			`at %d, root is not a []map[string]interface{}`, index)
 		return node
 	}
 	if int(index) >= len(node.Value.([]map[string]interface{})) {
-		node.Err = fmt.Errorf(`Cannot get map[string]interface{} `
+		node.Err = fmt.Errorf(`Cannot get map[string]interface{} `+
 			`at %d, invalid index`, index)
 		return node
 	}
