@@ -78,7 +78,7 @@ func (node *Node) MapAt(index uint) *Node {
 
 func (node *Node) Int(key string) *Node {
 	if node.Err != nil {
-		return Node
+		return node
 	}
 	if !isMapOfInterfaces(node.Value) { //Can be removed, can have a flag or a diferent compilation file
 		node.Err = fmt.Errorf(`Cannot get integer "`+key+
