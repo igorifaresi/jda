@@ -11,17 +11,23 @@ type Node struct {
 }
 
 func isMapOfInterfaces(value interface{}) bool {
-	switch value.(type) {
+	switch t := value.(type) {
 	case map[string]interface{}:
 		return true
+		fmt.Println(t)
+	default:
+		fmt.Println(t)
 	}
 	return false
 }
 
 func isMapOfInterfacesSlice(value interface{}) bool {
-	switch value.(type) {
+	switch t := value.(type) {
 	case []map[string]interface{}:
 		return true
+		fmt.Println(t)
+	default:
+		fmt.Println(t)
 	}
 	return false
 }
