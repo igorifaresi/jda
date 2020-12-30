@@ -1,7 +1,6 @@
 package interpath
 
 import (
-	"github.com/igorifaresi/jda"
 	"fmt"
 )
 
@@ -61,16 +60,16 @@ func (node *Node) MapSlice(key string) *Node {
 
 func (node *Node) MapAt(index uint) *Node {
 	if node.Err != nil {
-		return Node
-	}
-	if !isMapOfInterfacesSlice(node.Value) {
-		node.Err = fmt.Errorf(`Cannot get map[string]interface{} "`+key+
-			`" at %d, root is not a []map[string]interface{}`, index)
 		return node
 	}
-	if index >= len(node.Value.([]map[string]interface{})) {
-		node.Err = fmt.Errorf(`Cannot get map[string]interface{} "`+key+
-			`" at %d, invalid index`, index)
+	if !isMapOfInterfacesSlice(node.Value) {
+		node.Err = fmt.Errorf(`Cannot get map[string]interface{} `
+			`at %d, root is not a []map[string]interface{}`, index)
+		return node
+	}
+	if int(index) >= len(node.Value.([]map[string]interface{})) {
+		node.Err = fmt.Errorf(`Cannot get map[string]interface{} `
+			`at %d, invalid index`, index)
 		return node
 	}
 	node.Value = node.Value.([]map[string]interface{})[index]
