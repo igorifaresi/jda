@@ -122,7 +122,7 @@ func (node *Node) Int(key string) *Node {
 
 func (node *Node) String(key string) *Node {
 	if node.Err != nil {
-		return Node
+		return node
 	}
 	if !isMapOfInterfaces(node.Value) { //Can be removed, can have a flag or a diferent compilation file
 		node.Err = fmt.Errorf(`Cannot get string "`+key+
