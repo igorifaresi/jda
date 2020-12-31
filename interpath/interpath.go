@@ -10,24 +10,18 @@ type Node struct {
 	//TODO: Add client-level verbose
 }
 
-func isMapOfInterfaces(value interface{}) bool {
+func isMap(value interface{}) bool {
 	switch t := value.(type) {
 	case map[string]interface{}:
 		return true
-		fmt.Println(t)
-	default:
-		fmt.Println(t)
 	}
 	return false
 }
 
-func isMapOfInterfacesSlice(value interface{}) bool {
+func isSlice(value interface{}) bool {
 	switch t := value.(type) {
-	case []map[string]interface{}:
+	case []interface{}:
 		return true
-		fmt.Println(t)
-	default:
-		fmt.Println(t)
 	}
 	return false
 }
@@ -39,28 +33,28 @@ func Init(value interface{}) *Node {
 	}
 }
 
-func (node *Node) MapSlice(key string) *Node {
+func (node *Node) Slice(key string) *Node {
 	if node.Err != nil {
 		return node
 	}
-	if !isMapOfInterfaces(node.Value) {
-		node.Err = fmt.Errorf(`Cannot get map slice "`+key+
+	if !isMap(node.Value) {
+		node.Err = fmt.Errorf(`Cannot get slice "`+key+
 			`", root is not a map[string]interface{}`)
 		return node
 	}
 	v, ok := node.Value.(map[string]interface{})[key]
 	if !ok {
-		node.Err = fmt.Errorf(`Cannot get map slice "`+key+
+		node.Err = fmt.Errorf(`Cannot get slice "`+key+
 			`", key dont exists in root map[string]interface{}`)
 		return node
 	}
 	switch v.(type) {
-	case []map[string]interface{}:
+	case []interface{}:
 		node.Value = v
 		return node
 	}
-	node.Err = fmt.Errorf(`Cannot get map slice "`+key+
-		`", value is not []map[string]interface{}`)
+	node.Err = fmt.Errorf(`Cannot get slice "`+key+
+		`", value is not []interface{}`)
 	return node
 }
 
@@ -68,9 +62,9 @@ func (node *Node) MapAt(index uint) *Node {
 	if node.Err != nil {
 		return node
 	}
-	if !isMapOfInterfacesSlice(node.Value) {
+	if !isSlice(node.Value) {
 		node.Err = fmt.Errorf(`Cannot get map[string]interface{} `+
-			`at %d, root is not a []map[string]interface{}`, index)
+			`at %d, root is not a []interface{}`, index)
 		return node
 	}
 	if int(index) >= len(node.Value.([]map[string]interface{})) {
@@ -86,7 +80,7 @@ func (node *Node) Int(key string) *Node {
 	if node.Err != nil {
 		return node
 	}
-	if !isMapOfInterfaces(node.Value) { //Can be removed, can have a flag or a diferent compilation file
+	if !isMap(node.Value) { //Can be removed, can have a flag or a diferent compilation file
 		node.Err = fmt.Errorf(`Cannot get integer "`+key+
 			`", root is not a map[string]interface{}`)
 		return node
@@ -130,7 +124,7 @@ func (node *Node) String(key string) *Node {
 	if node.Err != nil {
 		return node
 	}
-	if !isMapOfInterfaces(node.Value) { //Can be removed, can have a flag or a diferent compilation file
+	if !isMap(node.Value) { //Can be removed, can have a flag or a diferent compilation file
 		node.Err = fmt.Errorf(`Cannot get string "`+key+
 			`", root is not a map[string]interface{}`)
 		return node
