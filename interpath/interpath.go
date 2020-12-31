@@ -11,7 +11,7 @@ type Node struct {
 }
 
 func isMap(value interface{}) bool {
-	switch t := value.(type) {
+	switch value.(type) {
 	case map[string]interface{}:
 		return true
 	}
@@ -19,7 +19,7 @@ func isMap(value interface{}) bool {
 }
 
 func isSlice(value interface{}) bool {
-	switch t := value.(type) {
+	switch value.(type) {
 	case []interface{}:
 		return true
 	}
