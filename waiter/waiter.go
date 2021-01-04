@@ -79,6 +79,23 @@ func GetQueryParameterInt(ctx Context, parameterName string) (int, error) {
 	return int(number), nil	
 }
 
+func GetQueryParameterHex(ctx Context, parameterName string) (int, error) {
+	l := jda.GetLogger()
+	
+	values, ok := ctx.R.URL.Query()[parameterName]
+	if !ok || len(values) < 1 {
+		l.Error(`"`+parameterName+`" query parameter not found`)
+		return 0, l.ErrorQueue
+	}
+	number, err := strconv.ParseInt(values[0], 16, 64)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error(`"`+parameterName+`" query parameter is not a valid hex integer`)
+		return 0, l.ErrorQueue
+	}
+	return int(number), nil	
+}
+
 func POST(path string, handled POSTFunc) {
 	l := jda.GetLogger()
 
