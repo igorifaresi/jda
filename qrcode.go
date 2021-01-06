@@ -25,7 +25,7 @@ func QrcodeGenerateURI(content string, size int) (string, error) {
 	if err != nil {
 		l.Error(err.Error())
 		l.Error("Error in generate QR Code")
-		return []byte{}, l.ErrorQueue
+		return "", l.ErrorQueue
 	}
 	
 	pngBase64 := base64.URLEncoding.EncodeToString(png)
