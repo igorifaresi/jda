@@ -18,7 +18,7 @@ func QrcodeGenerate(content string, size int) ([]byte, error) {
 	return png, nil
 }
 
-func QrcodeGenerateURI(content string, size int) ([]byte, error) {
+func QrcodeGenerateURI(content string, size int) (string, error) {
 	l := GetLogger()
 	
 	png, err := qrcode.Encode(content, qrcode.Medium, size)
