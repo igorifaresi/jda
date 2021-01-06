@@ -28,7 +28,7 @@ func QrcodeGenerateURI(content string, size int) (string, error) {
 		return "", l.ErrorQueue
 	}
 	
-	pngBase64 := base64.URLEncoding.EncodeToString(png)
+	pngBase64 := base64.StdEncoding.EncodeToString(png)
 	
 	return `data:image/png;charset=utf-8;base64,`+pngBase64, nil
 }
