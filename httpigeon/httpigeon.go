@@ -1,4 +1,4 @@
-package pigeon
+package httpigeon
 
 import (
 	"github.com/igorifaresi/jda"
