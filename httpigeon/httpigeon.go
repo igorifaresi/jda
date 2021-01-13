@@ -52,7 +52,7 @@ func Fetch(request Request) (Response, error) {
 	}
 	
 	for key, element := range request.Header {
-		req.Header.Set(key, element)
+		req.Header.Set(key, fmt.Sprint(element))
 	}
 	
 	client := &http.Client{}
@@ -100,7 +100,7 @@ func FetchJSON(request Request) (ResponseInter, error) {
 	}
 	
 	for key, element := range request.Header {
-		req.Header.Set(key, element)
+		req.Header.Set(key, fmt.Sprint(element))
 	}
 	
 	client := &http.Client{}
