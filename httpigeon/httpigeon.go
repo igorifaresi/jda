@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"io/ioutil"
 	"bytes"
+	"fmt"
 )
 
-type M map[string]string
+type M map[string]interface{}
 
 type Request struct {
 	Method string
@@ -39,7 +40,7 @@ func Fetch(request Request) (Response, error) {
 			} else {
 				url = url+"?"	
 			}
-			url = url+key+"="+element
+			url = url+key+"="+fmt.Sprint(element)
 		}
 	}
 	
@@ -87,7 +88,7 @@ func FetchJSON(request Request) (ResponseInter, error) {
 			} else {
 				url = url+"?"	
 			}
-			url = url+key+"="+element
+			url = url+key+"="+fmt.Sprint(element)
 		}
 	}
 	
