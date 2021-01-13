@@ -2,8 +2,8 @@ package pigeon
 
 import (
 	"github.com/igorifaresi/jda"
-	"net/http"
 	"io/ioutil"
+	"net/http"
 	"bytes"
 	"fmt"
 )
