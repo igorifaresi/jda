@@ -8,10 +8,11 @@ import (
 )
 
 type Context struct {
-	W       http.ResponseWriter
-	R       *http.Request
-	Data    []byte
-	Session map[string]interface{}
+	W        http.ResponseWriter
+	R        *http.Request
+	Data     []byte
+	Embedded map[string]interface{}
+	Logger   jda.Logger
 }
 
 type Dish struct {
@@ -97,9 +98,8 @@ func GetQueryParameterHex(ctx Context, parameterName string) (int, error) {
 }
 
 func POST(path string, handled POSTFunc) {
-	l := jda.GetLogger()
-
 	f := func(w http.ResponseWriter, r *http.Request) {
+		l := jda.GetLogger()
 		if Verbose {
 			l.Log(`POST request at "`+path+`" ip `+jda.HttpGetIP(r))
 		}
@@ -123,7 +123,7 @@ func POST(path string, handled POSTFunc) {
 				w.WriteHeader(500)
 				w.Write([]byte("ifr.waiter: Error in parse request body"))
 			}
-			dish := handled(Context{ W: w, R: r, Data: body })
+			dish := handled(Context{ W: w, R: r, Data: body, Logger: l })
 			w.WriteHeader(dish.Status)
 			w.Write([]byte(dish.Text))
 		case "OPTIONS":
