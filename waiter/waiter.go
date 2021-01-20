@@ -99,7 +99,7 @@ func GetQueryParameterHex(ctx Context, parameterName string) (int, error) {
 
 func POST(path string, handled POSTFunc) {
 	f := func(w http.ResponseWriter, r *http.Request) {
-		l := jda.GetLogger()
+		l := jda.GetLogger(path)
 		if Verbose {
 			l.Log(`POST request at "`+path+`" ip `+jda.HttpGetIP(r))
 		}
