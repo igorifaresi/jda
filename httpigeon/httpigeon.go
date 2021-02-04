@@ -2,6 +2,7 @@ package httpigeon
 
 import (
 	"github.com/igorifaresi/jda"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"bytes"
