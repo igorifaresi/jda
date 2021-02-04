@@ -104,6 +104,8 @@ func FetchJSON(request Request) (ResponseInter, error) {
 		req.Header.Set(key, fmt.Sprint(element))
 	}
 	
+fmt.Println(req)
+	
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
