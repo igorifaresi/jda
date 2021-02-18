@@ -133,9 +133,9 @@ func (l Logger) Warn(content string) {
 	fmt.Println("\033[0;33m"+getTimestamp()+" "+l.Stamp+" WARN\033[0m "+content)
 }
 
-func (l *Logger) Error(content string) LoggerErrorQueue {
+func (l *Logger) Error(content string) string {
 	l.ErrorQueue.Queue = append(l.ErrorQueue.Queue, LoggerError{content, l.Stamp, getTimestamp()})
-	return l.ErrorQueue
+	return content
 }
 
 func (l Logger) DebugLog(content string) {
