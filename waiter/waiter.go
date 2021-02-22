@@ -91,7 +91,24 @@ func GetQueryParameterInt64(ctx Context, parameterName string) (int64, error) {
 	number, err := strconv.ParseInt(values[0], 10, 64)
 	if err != nil {
 		l.Error(err.Error())
-		l.Error(`"`+parameterName+`" query parameter is not a valid integer`)
+		l.Error(`"`+parameterName+`" query parameter is not a valid 64 bits integer`)
+		return 0, l.ErrorQueue
+	}
+	return number, nil	
+}
+
+func GetQueryParameterFloat64(ctx Context, parameterName string) (float64, error) {
+	l := jda.GetLogger()
+	
+	values, ok := ctx.R.URL.Query()[parameterName]
+	if !ok || len(values) < 1 {
+		l.Error(`"`+parameterName+`" query parameter not found`)
+		return 0, l.ErrorQueue
+	}
+	number, err := strconv.ParseFloat(values[0], 64)
+	if err != nil {
+		l.Error(err.Error())
+		l.Error(`"`+parameterName+`" query parameter is not a valid 64 bits float`)
 		return 0, l.ErrorQueue
 	}
 	return number, nil	
