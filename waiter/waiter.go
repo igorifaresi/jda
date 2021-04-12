@@ -20,8 +20,7 @@ type Dish struct {
 	Text   string
 }
 
-type GETFunc func(Context) Dish
-type POSTFunc func(Context) Dish
+type CallbackFunc func(Context) Dish
 
 const (
 	ERROR_NONE = iota
@@ -131,19 +130,19 @@ func GetQueryParameterHex(ctx Context, parameterName string) (int, error) {
 	return int(number), nil	
 }
 
-func POST(path string, handled POSTFunc) {
+func do(method string, path string, handled CallbackFunc) {
 	f := func(w http.ResponseWriter, r *http.Request) {
 		l := jda.GetLogger(path)
 		if Verbose {
-			l.Log(`POST request at "`+path+`" ip `+jda.HttpGetIP(r))
+			l.Log(method+` request at "`+path+`" ip `+jda.HttpGetIP(r))
 		}
 		
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", method+", OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 		switch r.Method {
-		case "POST":
+		case method:
 			body, err := ioutil.ReadAll(r.Body)
 			if err != nil {
 				if ErrorMode == ERROR_PRINT || ErrorMode == ERROR_DUMP {
@@ -169,16 +168,28 @@ func POST(path string, handled POSTFunc) {
 	http.HandleFunc(path, f)
 }
 
-type Hostess struct {
-	Generator func(POSTFunc) POSTFunc 	
+func POST(path string, handled CallbackFunc) {
+	do("POST", path, handled)	
 }
 
-func NewHostess(f func(POSTFunc) POSTFunc) Hostess {
+func GET(path string, handled CallbackFunc) {
+	do("GET", path, handled)	
+}
+
+type Hostess struct {
+	Generator func(CallbackFunc) CallbackFunc 	
+}
+
+func NewHostess(f func(CallbackFunc) CallbackFunc) Hostess {
 	return Hostess{ Generator: f }
 }
 
-func (hostess Hostess) POST(path string, handled POSTFunc) {
+func (hostess Hostess) POST(path string, handled CallbackFunc) {
 	POST(path, hostess.Generator(handled))
+}
+
+func (hostess Hostess) GET(path string, handled CallbackFunc) {
+	GET(path, hostess.Generator(handled))
 }
 
 func Listen() {
